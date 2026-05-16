@@ -1,55 +1,103 @@
-// GET PRODUCTS FROM LOCALSTORAGE
-const products =
-  JSON.parse(localStorage.getItem("products")) || [];
+// LOCAL STORAGE FUNCTIONS
+
+function getProducts() {
+
+  return JSON.parse(
+    localStorage.getItem("products")
+  ) || [];
+
+}
+
+function saveProducts(products) {
+
+  localStorage.setItem(
+    "products",
+    JSON.stringify(products)
+  );
+
+}
+
+// GET PRODUCTS
+
+const products = getProducts();
 
 // SAMPLE DATA IF STORAGE IS EMPTY
+
+
 if (products.length === 0) {
 
   const sampleProducts = [
 
     {
+      id: Date.now(),
+
       name: "Paracetamol",
+
+      category: "Tablet",
+
       quantity: 5,
-      expiry: "2026-05-08"
+
+      expiry: "2026-05-08",
+
+      price: 20
     },
 
     {
+      id: Date.now() + 1,
+
       name: "Vitamin C",
+
+      category: "Supplement",
+
       quantity: 15,
-      expiry: "2026-05-14"
+
+      expiry: "2026-05-14",
+
+      price: 50
     },
 
     {
+      id: Date.now() + 2,
+
       name: "Dolo 650",
+
+      category: "Tablet",
+
       quantity: 3,
-      expiry: "2026-06-10"
+
+      expiry: "2026-06-10",
+
+      price: 30
     },
 
     {
+      id: Date.now() + 3,
+
       name: "Cough Syrup",
+
+      category: "Syrup",
+
       quantity: 7,
-      expiry: "2026-05-20"
+
+      expiry: "2026-05-20",
+
+      price: 80
     }
 
   ];
 
-  localStorage.setItem(
-    "products",
-    JSON.stringify(sampleProducts)
-  );
+  saveProducts(sampleProducts);
 
   location.reload();
 }
 
-
 // TODAY DATE
-
 
 const today = new Date();
 
 today.setHours(0, 0, 0, 0);
 
-// SELECT ELEMENTS
+// SELECT HTML ELEMENTS
 
 
 const expiredContainer =
@@ -99,17 +147,38 @@ function getDaysLeft(expiryDate) {
     expiry - today;
 
   return Math.ceil(
+
     difference /
+
     (1000 * 60 * 60 * 24)
+
   );
+
+}
+
+// FUNCTION TO FORMAT DATE
+
+
+function formatDate(date) {
+
+  return new Date(date)
+    .toLocaleDateString();
+
 }
 
 // GET ALERT DATA
 
-
 function getAlertData() {
 
+  const products = getProducts();
+
+
+
+
+  // EXPIRED PRODUCTS
+
   const expiredProducts =
+
     products.filter(product => {
 
       return new Date(product.expiry)
@@ -119,7 +188,11 @@ function getAlertData() {
 
 
 
+
+  // EXPIRING SOON PRODUCTS
+
   const expiringSoon =
+
     products.filter(product => {
 
       const expiryDate =
@@ -129,7 +202,9 @@ function getAlertData() {
         expiryDate - today;
 
       const daysLeft =
+
         difference /
+
         (1000 * 60 * 60 * 24);
 
       return daysLeft <= 7
@@ -137,9 +212,13 @@ function getAlertData() {
 
     });
 
-// LOW STOCK
+
+
+
+  // LOW STOCK PRODUCTS
 
   const lowStock =
+
     products.filter(product => {
 
       return product.quantity < 10;
@@ -148,29 +227,44 @@ function getAlertData() {
 
 
 
-  return {
-    expiredProducts,
-    expiringSoon,
-    lowStock
-  };
-}
 
+  return {
+
+    expiredProducts,
+
+    expiringSoon,
+
+    lowStock
+
+  };
+
+}
 // REUSABLE RENDER FUNCTION
 
 function renderProducts(
+
   container,
+
   title,
+
   products,
+
   colorClass,
+
   emptyMessage,
+
   extraInfo
+
 ) {
 
   container.innerHTML = `
 
     <h2>
+
       ${title}
+
       (${products.length})
+
     </h2>
 
     ${products.length > 0
@@ -181,11 +275,29 @@ function renderProducts(
 
         <div class="alert-card ${colorClass}">
 
-          <h3>${product.name}</h3>
+          <div class="card-top">
+
+            <h3>${product.name}</h3>
+
+            <span class="category">
+
+              ${product.category}
+
+            </span>
+
+          </div>
 
           <p>
+
             ${extraInfo(product)}
+
           </p>
+
+          <div class="price">
+
+            ₹${product.price}
+
+          </div>
 
         </div>
 
@@ -194,42 +306,49 @@ function renderProducts(
       :
 
       `<p class="empty-message">
+
         ${emptyMessage}
+
       </p>`
+
     }
 
   `;
+
 }
 
 // DISPLAY ALERTS
 
-
 function showAlerts(searchValue = "") {
 
   const {
+
     expiredProducts,
+
     expiringSoon,
+
     lowStock
+
   } = getAlertData();
-
-
 
   // SUMMARY COUNTS
 
   expiredCount.textContent =
+
     expiredProducts.length;
 
   expiringCount.textContent =
+
     expiringSoon.length;
 
   lowstockCount.textContent =
+
     lowStock.length;
-
-
 
   // SEARCH FILTERING
 
   const filteredExpired =
+
     expiredProducts.filter(product => {
 
       return product.name
@@ -238,9 +357,8 @@ function showAlerts(searchValue = "") {
 
     });
 
-
-
   const filteredExpiring =
+
     expiringSoon.filter(product => {
 
       return product.name
@@ -249,9 +367,8 @@ function showAlerts(searchValue = "") {
 
     });
 
-
-
   const filteredLowStock =
+
     lowStock.filter(product => {
 
       return product.name
@@ -260,10 +377,7 @@ function showAlerts(searchValue = "") {
 
     });
 
-
-
-  // EXPIRED PRODUCTS
-
+  // RENDER EXPIRED PRODUCTS
   renderProducts(
 
     expiredContainer,
@@ -277,15 +391,19 @@ function showAlerts(searchValue = "") {
     "No expired products",
 
     product => `
+
       Expired On:
-      ${product.expiry}
+      ${formatDate(product.expiry)}
+
+      <br><br>
+
+      Quantity:
+      ${product.quantity}
+
     `
   );
 
-
-
-  // EXPIRING SOON
-
+  // RENDER EXPIRING SOON PRODUCTS
   renderProducts(
 
     expiringContainer,
@@ -299,20 +417,19 @@ function showAlerts(searchValue = "") {
     "No products expiring soon",
 
     product => `
+
       Expiry Date:
-      ${product.expiry}
+      ${formatDate(product.expiry)}
 
       <br><br>
 
       ${getDaysLeft(product.expiry)}
       days left
+
     `
   );
-
-
-
-  // LOW STOCK
-
+  
+  // RENDER LOW STOCK PRODUCTS
   renderProducts(
 
     lowstockContainer,
@@ -326,42 +443,71 @@ function showAlerts(searchValue = "") {
     "No low stock alerts",
 
     product => `
+
       Quantity Left:
       ${product.quantity}
+
+      <br><br>
+
+      Expiry:
+      ${formatDate(product.expiry)}
+
     `
   );
+
 }
 
-// INITIAL LOAD
-
+// INITIAL PAGE LOAD
 showAlerts();
 
 // SEARCH FUNCTIONALITY
 searchInput.addEventListener(
+
   "input",
+
   function(event) {
 
     const value =
-      event.target.value.toLowerCase();
+
+      event.target.value
+        .toLowerCase();
 
     showAlerts(value);
 
   }
+
 );
 
 // FETCH API USING ASYNC/AWAIT
-
 async function fetchMedicineData() {
 
   try {
 
     const response =
+
       await fetch(
         "https://dummyjson.com/products"
       );
 
+
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Failed to fetch data"
+      );
+
+    }
+
+
+
+
     const data =
       await response.json();
+
+
+
 
     console.log(
       "Fetched API Data:",
@@ -373,13 +519,16 @@ async function fetchMedicineData() {
   catch(error) {
 
     console.log(
+
       "Fetch Error:",
+
       error
+
     );
+
   }
+
 }
 
 // CALL FETCH FUNCTION
-
-
 fetchMedicineData();
