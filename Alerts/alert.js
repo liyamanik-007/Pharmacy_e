@@ -1,5 +1,8 @@
+// GET PRODUCTS FROM LOCALSTORAGE
 const products =
   JSON.parse(localStorage.getItem("products")) || [];
+
+// SAMPLE DATA IF STORAGE IS EMPTY
 if (products.length === 0) {
 
   const sampleProducts = [
@@ -20,6 +23,12 @@ if (products.length === 0) {
       name: "Dolo 650",
       quantity: 3,
       expiry: "2026-06-10"
+    },
+
+    {
+      name: "Cough Syrup",
+      quantity: 7,
+      expiry: "2026-05-20"
     }
 
   ];
@@ -35,58 +44,13 @@ if (products.length === 0) {
 
 // TODAY DATE
 
+
 const today = new Date();
 
+today.setHours(0, 0, 0, 0);
 
+// SELECT ELEMENTS
 
-// EXPIRED PRODUCTS
-
-const expiredProducts =
-  products.filter(product => {
-
-    return new Date(product.expiry)
-      < today;
-
-  });
-
-
-
-// EXPIRING SOON
-
-const expiringSoon =
-  products.filter(product => {
-
-    const expiryDate =
-      new Date(product.expiry);
-
-    const difference =
-      expiryDate - today;
-
-    const daysLeft =
-      difference /
-      (1000 * 60 * 60 * 24);
-
-    return daysLeft <= 7
-      && daysLeft >= 0;
-
-  });
-
-
-
-
-// LOW STOCK
-
-const lowStock =
-  products.filter(product => {
-
-    return product.quantity < 10;
-
-  });
-
-
-
-
-// SELECT CONTAINERS
 
 const expiredContainer =
   document.getElementById(
@@ -103,106 +67,319 @@ const lowstockContainer =
     "lowstock-container"
   );
 
+const searchInput =
+  document.getElementById(
+    "search"
+  );
+
+const expiredCount =
+  document.getElementById(
+    "expired-count"
+  );
+
+const expiringCount =
+  document.getElementById(
+    "expiring-count"
+  );
+
+const lowstockCount =
+  document.getElementById(
+    "lowstock-count"
+  );
+
+// FUNCTION TO CALCULATE DAYS LEFT
 
 
+function getDaysLeft(expiryDate) {
 
-// SHOW EXPIRED PRODUCTS
+  const expiry =
+    new Date(expiryDate);
 
-expiredContainer.innerHTML =
+  const difference =
+    expiry - today;
 
-  `
-    <h2>
-      Expired Products
-      (${expiredProducts.length})
-    </h2>
-
-    ${expiredProducts.map(product => `
-
-      <div class="alert-card red">
-
-        <h3>${product.name}</h3>
-
-        <p>
-          Expired:
-          ${product.expiry}
-        </p>
-
-      </div>
-
-    `).join("")}
-  `;
-
-
-
-
-// SHOW EXPIRING SOON
-
-expiringContainer.innerHTML =
-
-  `
-    <h2>
-      Expiring Soon
-      (${expiringSoon.length})
-    </h2>
-
-    ${expiringSoon.map(product => `
-
-      <div class="alert-card yellow">
-
-        <h3>${product.name}</h3>
-
-        <p>
-          Expiry:
-          ${product.expiry}
-        </p>
-
-      </div>
-
-    `).join("")}
-  `;
-
-
-
-
-// SHOW LOW STOCK
-
-lowstockContainer.innerHTML =
-
-  `
-    <h2>
-      Low Stock
-      (${lowStock.length})
-    </h2>
-
-    ${lowStock.map(product => `
-
-      <div class="alert-card blue">
-
-        <h3>${product.name}</h3>
-
-        <p>
-          Quantity:
-          ${product.quantity}
-        </p>
-
-      </div>
-
-    `).join("")}
-  `;
-if (expiredProducts.length === 0) {
-
-  expiredContainer.innerHTML +=
-    `<p>No expired products</p>`;
+  return Math.ceil(
+    difference /
+    (1000 * 60 * 60 * 24)
+  );
 }
 
-if (expiringSoon.length === 0) {
+// GET ALERT DATA
 
-  expiringContainer.innerHTML +=
-    `<p>No products expiring soon</p>`;
+
+function getAlertData() {
+
+  const expiredProducts =
+    products.filter(product => {
+
+      return new Date(product.expiry)
+        < today;
+
+    });
+
+
+
+  const expiringSoon =
+    products.filter(product => {
+
+      const expiryDate =
+        new Date(product.expiry);
+
+      const difference =
+        expiryDate - today;
+
+      const daysLeft =
+        difference /
+        (1000 * 60 * 60 * 24);
+
+      return daysLeft <= 7
+        && daysLeft >= 0;
+
+    });
+
+// LOW STOCK
+
+  const lowStock =
+    products.filter(product => {
+
+      return product.quantity < 10;
+
+    });
+
+
+
+  return {
+    expiredProducts,
+    expiringSoon,
+    lowStock
+  };
 }
 
-if (lowStock.length === 0) {
+// REUSABLE RENDER FUNCTION
 
-  lowstockContainer.innerHTML +=
-    `<p>No low stock alerts</p>`;
+function renderProducts(
+  container,
+  title,
+  products,
+  colorClass,
+  emptyMessage,
+  extraInfo
+) {
+
+  container.innerHTML = `
+
+    <h2>
+      ${title}
+      (${products.length})
+    </h2>
+
+    ${products.length > 0
+
+      ?
+
+      products.map(product => `
+
+        <div class="alert-card ${colorClass}">
+
+          <h3>${product.name}</h3>
+
+          <p>
+            ${extraInfo(product)}
+          </p>
+
+        </div>
+
+      `).join("")
+
+      :
+
+      `<p class="empty-message">
+        ${emptyMessage}
+      </p>`
+    }
+
+  `;
 }
+
+// DISPLAY ALERTS
+
+
+function showAlerts(searchValue = "") {
+
+  const {
+    expiredProducts,
+    expiringSoon,
+    lowStock
+  } = getAlertData();
+
+
+
+  // SUMMARY COUNTS
+
+  expiredCount.textContent =
+    expiredProducts.length;
+
+  expiringCount.textContent =
+    expiringSoon.length;
+
+  lowstockCount.textContent =
+    lowStock.length;
+
+
+
+  // SEARCH FILTERING
+
+  const filteredExpired =
+    expiredProducts.filter(product => {
+
+      return product.name
+        .toLowerCase()
+        .includes(searchValue);
+
+    });
+
+
+
+  const filteredExpiring =
+    expiringSoon.filter(product => {
+
+      return product.name
+        .toLowerCase()
+        .includes(searchValue);
+
+    });
+
+
+
+  const filteredLowStock =
+    lowStock.filter(product => {
+
+      return product.name
+        .toLowerCase()
+        .includes(searchValue);
+
+    });
+
+
+
+  // EXPIRED PRODUCTS
+
+  renderProducts(
+
+    expiredContainer,
+
+    "Expired Products",
+
+    filteredExpired,
+
+    "red",
+
+    "No expired products",
+
+    product => `
+      Expired On:
+      ${product.expiry}
+    `
+  );
+
+
+
+  // EXPIRING SOON
+
+  renderProducts(
+
+    expiringContainer,
+
+    "Expiring Soon",
+
+    filteredExpiring,
+
+    "yellow",
+
+    "No products expiring soon",
+
+    product => `
+      Expiry Date:
+      ${product.expiry}
+
+      <br><br>
+
+      ${getDaysLeft(product.expiry)}
+      days left
+    `
+  );
+
+
+
+  // LOW STOCK
+
+  renderProducts(
+
+    lowstockContainer,
+
+    "Low Stock",
+
+    filteredLowStock,
+
+    "blue",
+
+    "No low stock alerts",
+
+    product => `
+      Quantity Left:
+      ${product.quantity}
+    `
+  );
+}
+
+// INITIAL LOAD
+
+showAlerts();
+
+// SEARCH FUNCTIONALITY
+searchInput.addEventListener(
+  "input",
+  function(event) {
+
+    const value =
+      event.target.value.toLowerCase();
+
+    showAlerts(value);
+
+  }
+);
+
+// FETCH API USING ASYNC/AWAIT
+
+async function fetchMedicineData() {
+
+  try {
+
+    const response =
+      await fetch(
+        "https://dummyjson.com/products"
+      );
+
+    const data =
+      await response.json();
+
+    console.log(
+      "Fetched API Data:",
+      data
+    );
+
+  }
+
+  catch(error) {
+
+    console.log(
+      "Fetch Error:",
+      error
+    );
+  }
+}
+
+// CALL FETCH FUNCTION
+
+
+fetchMedicineData();

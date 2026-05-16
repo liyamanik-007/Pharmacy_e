@@ -1,35 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>Alerts</title>
-
-  <link rel="stylesheet"
-        href="alert.css">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>Inventory Alerts</title>
+  <link
+    rel="stylesheet"
+    href="alert.css">
 </head>
 
 <body>
-
   <div class="container">
+    <!-- HEADER -->
+    <div class="top-section">
+      <div>
+        <h1>Inventory Alerts</h1>
+        <p class="subtitle">
+          Monitor expired medicines, low stock,
+          and products expiring soon.
+        </p>
+      </div>
+      <a
+        href="../index.html"
+        class="back-btn">
+        &larr; Dashboard
+      </a>
+    </div>
+    <!-- SEARCH BAR -->
+    <input
+      type="text"
+      id="search"
+      placeholder="Search products...">
+    <!-- SUMMARY CARDS -->
+    <div class="summary-cards">
+      <div class="summary red-summary">
+        <h3>Expired</h3>
+        <p id="expired-count">0</p>
+      </div>
 
-    <h1>Inventory Alerts</h1>
-    <a href="../index.html" class="back-btn">
-        &larr; Back to Dashboard
-</a>
+      <div class="summary yellow-summary">
+        <h3>Expiring Soon</h3>
+        <p id="expiring-count">0</p>
+      </div>
 
+      <div class="summary blue-summary">
+        <h3>Low Stock</h3>
+        <p id="lowstock-count">0</p>
+      </div>
+    </div>
+    <!-- ALERT CONTAINERS -->
     <div id="expired-container"></div>
-
     <div id="expiring-container"></div>
-
     <div id="lowstock-container"></div>
-
   </div>
-
   <script src="alert.js"></script>
-
 </body>
 </html>
